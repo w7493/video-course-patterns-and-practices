@@ -10,14 +10,16 @@ use Service\Communication\Creator as CommunicationCreator;
 use Service\Communication\Exception\CommunicationException;
 use Service\Discount\Creator as DiscountCreator;
 use Service\Discount\Exception\UnavailableDiscountException;
+use Model\Entity;
+use App\Db\DbProvider;
 
 class Checkout
 {
     public function __construct(
-        private readonly Model\Repository\Basket $basket,
         private readonly DiscountCreator $discountCreator,
         private readonly CommunicationCreator $communicationCreator,
         private readonly BillingCreator $billingCreator,
+        private readonly DbProvider $db,
     ) {
     }
 
@@ -26,8 +28,20 @@ class Checkout
      */
     public function checkoutProcess(int $userId, CheckoutProduct $checkoutProduct): bool
     {
+        $query = <<<EOT
+            select b.id, p.name, p.price
+            from basket b
+            inner join product p on b.product_id = p.id
+            where b.user_id = :user_id and p.is_hidden = 0
+        EOT;
+
+        $userBasket = [];
+        foreach ($this->db->fetchAll($query, [':user_id' => $userId]) as $item) {
+            $userBasket[] = new Entity\Basket($item['id'], $item['name'], $item['price']);
+        }
+
         $totalPrice = 0;
-        foreach ($this->basket->getUserBasket($userId) as $product) {
+        foreach ($userBasket as $product) {
             $totalPrice += $product->getPrice();
         }
 

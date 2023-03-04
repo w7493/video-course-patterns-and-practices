@@ -26,7 +26,7 @@ class Product
 
         $productList = [];
         foreach ($this->db->fetchAll($query, $params) as $item) {
-            $productList[] = $this->createProductEntity($item);
+            $productList[] = new Entity\Product($item['id'], $item['name'], $item['price'], (bool) $item['is_hidden']);
         }
 
         return $productList;
@@ -48,7 +48,7 @@ class Product
 
         $productList = [];
         foreach ($this->db->fetchAll($query, $ids) as $item) {
-            $productList[] = $this->createProductEntity($item);
+            $productList[] = new Entity\Product($item['id'], $item['name'], $item['price'], (bool) $item['is_hidden']);
         }
 
         return $productList;
@@ -84,13 +84,5 @@ class Product
             'update product set name = :name, price = :price, is_hidden = :is_hidden where id = :id',
             ['id' => $id, 'name' => $name, 'price' => $price, 'is_hidden' => (int) $isHidden],
         );
-    }
-
-    /**
-     * @param array<string, mixed> $item
-     */
-    private function createProductEntity(array $item): Entity\Product
-    {
-        return new Entity\Product($item['id'], $item['name'], $item['price'], (bool) $item['is_hidden']);
     }
 }

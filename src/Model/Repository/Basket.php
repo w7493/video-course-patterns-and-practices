@@ -15,28 +15,6 @@ class Basket
     }
 
     /**
-     * Возвращаем коллекцию товаров в корзине
-     *
-     * @return Entity\Basket[]
-     */
-    public function getUserBasket(int $userId): array
-    {
-        $query = <<<EOT
-            select b.id, p.name, p.price
-            from basket b
-            inner join product p on b.product_id = p.id
-            where b.user_id = :user_id and p.is_hidden = 0
-        EOT;
-
-        $userBasket = [];
-        foreach ($this->db->fetchAll($query, [':user_id' => $userId]) as $item) {
-            $userBasket[] = new Entity\Basket($item['id'], $item['name'], $item['price']);
-        }
-
-        return $userBasket;
-    }
-
-    /**
      * Добавляет продукт в корзину
      */
     public function addProduct(int $userId, int $productId, int $quantity): int

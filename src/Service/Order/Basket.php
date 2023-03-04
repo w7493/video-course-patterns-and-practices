@@ -4,16 +4,19 @@ declare(strict_types=1);
 
 namespace Service\Order;
 
+use App\Db\DbProvider;
 use App\Db\Exception\UniqueDbException;
 use Controller\Dto\Order\AddProduct;
 use Controller\Dto\Order\RemoveProduct;
 use Model;
+use Model\Entity;
 
 class Basket
 {
     public function __construct(
         private readonly Model\Repository\Basket $basket,
         private readonly Model\Repository\Product $product,
+        private readonly DbProvider $db,
     ) {
     }
 
@@ -24,7 +27,19 @@ class Basket
      */
     public function getUserBasket(int $userId): array
     {
-        return $this->basket->getUserBasket($userId);
+        $query = <<<EOT
+            select b.id, p.name, p.price
+            from basket b
+            inner join product p on b.product_id = p.id
+            where b.user_id = :user_id and p.is_hidden = 0
+        EOT;
+
+        $userBasket = [];
+        foreach ($this->db->fetchAll($query, [':user_id' => $userId]) as $item) {
+            $userBasket[] = new Entity\Basket($item['id'], $item['name'], $item['price']);
+        }
+
+        return $userBasket;
     }
 
     /**
@@ -32,7 +47,19 @@ class Basket
      */
     public function isProductInBasket(int $userId, int $productId): bool
     {
-        foreach ($this->basket->getUserBasket($userId) as $item) {
+        $query = <<<EOT
+            select b.id, p.name, p.price
+            from basket b
+            inner join product p on b.product_id = p.id
+            where b.user_id = :user_id and p.is_hidden = 0
+        EOT;
+
+        $userBasket = [];
+        foreach ($this->db->fetchAll($query, [':user_id' => $userId]) as $item) {
+            $userBasket[] = new Entity\Basket($item['id'], $item['name'], $item['price']);
+        }
+
+        foreach ($userBasket as $item) {
             if ($productId === $item->getId()) {
                 return true;
             }
