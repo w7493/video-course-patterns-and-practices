@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Controller;
 
-use Controller\Dto\Admin\AddProduct;
+use Controller\Dto\Admin\AddOrEditProduct;
 use Controller\Dto\Admin\ChangeVisibilityProduct;
-use Controller\Dto\Admin\EditProduct;
 use Service\Product\Product;
 use Symfony\Component\HttpFoundation\Request;
 use View\Response;
@@ -19,13 +18,13 @@ class AdminController
     }
 
     /**
-     * Добавляет новый продукт
+     * Добавляет новый или редактирует существующий продукт
      */
-    public function addProductAction(Request $request): Response
+    public function addOrEditProductAction(Request $request): Response
     {
         $requestData = $request->request->all();
 
-        if (!$this->validateAddProductData($requestData)) {
+        if (!$this->validateAddOrEditProductData($requestData)) {
             return new Response(
                 [
                     'message' => 'Отправлен невалидный набор данных',
@@ -34,46 +33,8 @@ class AdminController
             );
         }
 
-        $operation = $this->product->add(
-            $this->transformToAddProductDto($requestData)
-        );
-
-        if ($operation['isSuccess'] === false) {
-            return new Response(
-                [
-                    'message' => $operation['message'],
-                ],
-                false,
-            );
-        }
-
-        return new Response(
-            [
-                'product' => [
-                    'id' => $operation['productId'],
-                ],
-            ],
-        );
-    }
-
-    /**
-     * Редактирует существующий продукт
-     */
-    public function editProductAction(Request $request): Response
-    {
-        $requestData = $request->request->all();
-
-        if (!$this->validateEditProductData($requestData)) {
-            return new Response(
-                [
-                    'message' => 'Отправлен невалидный набор данных',
-                ],
-                false,
-            );
-        }
-
-        $operation = $this->product->edit(
-            $this->transformToEditProductDto($requestData)
+        $operation = $this->product->addOrEdit(
+            $this->transformToAddOrEditProductDto($requestData)
         );
 
         if ($operation['isSuccess'] === false) {
@@ -131,12 +92,12 @@ class AdminController
     }
 
     /**
-     * Здесь упрощённая валидация, чтобы не усложнять проект
+     * Упрощённая валидация, дабы не усложнять проект
      * Рекомендуется использовать symfony/validator
      *
      * @param array<string, mixed> $data
      */
-    private function validateAddProductData(array $data): bool
+    private function validateAddOrEditProductData(array $data): bool
     {
         return array_key_exists('name', $data)
             && is_string($data['name'])
@@ -144,41 +105,18 @@ class AdminController
             && is_numeric($data['price']);
     }
 
-    private function transformToAddProductDto(array $data): AddProduct
+    private function transformToAddOrEditProductDto(array $data): AddOrEditProduct
     {
-        return new AddProduct(
+        return new AddOrEditProduct(
             $data['name'],
             (int) $data['price'],
             isset($data['isHidden']) && $data['isHidden'],
+            isset($data['id']) ? (int) $data['id'] : null,
         );
     }
 
     /**
-     * Здесь упрощённая валидация, чтобы не усложнять проект
-     * Рекомендуется использовать symfony/validator
-     *
-     * @param array<string, mixed> $data
-     */
-    private function validateEditProductData(array $data): bool
-    {
-        return array_key_exists('name', $data)
-            && is_string($data['name'])
-            && array_key_exists('price', $data)
-            && is_numeric($data['price']);
-    }
-
-    private function transformToEditProductDto(array $data): EditProduct
-    {
-        return new EditProduct(
-            (int) $data['id'],
-            $data['name'],
-            (int) $data['price'],
-            isset($data['isHidden']) && $data['isHidden'],
-        );
-    }
-
-    /**
-     * Здесь упрощённая валидация, чтобы не усложнять проект
+     * Упрощённая валидация, дабы не усложнять проект
      * Рекомендуется использовать symfony/validator
      *
      * @param array<string, mixed> $data

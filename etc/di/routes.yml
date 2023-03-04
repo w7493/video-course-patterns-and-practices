@@ -1,11 +1,6 @@
 admin_product_add_or_edit:
-  path: /admin/product/add
-  controller: Controller\AdminController::addProductAction
-  methods: POST
-
-admin_product_edit:
-  path: /admin/product/edit
-  controller: Controller\AdminController::editProductAction
+  path: /admin/product/addOrEdit
+  controller: Controller\AdminController::addOrEditProductAction
   methods: POST
 
 admin_product_change_visibility:

@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace Service\Product;
 
 use App\Db\Exception\UniqueDbException;
-use Controller\Dto\Admin\AddProduct;
+use Controller\Dto\Admin\AddOrEditProduct;
 use Controller\Dto\Admin\ChangeVisibilityProduct;
-use Controller\Dto\Admin\EditProduct;
 use Model;
 
 class Product
@@ -37,34 +36,28 @@ class Product
     }
 
     /**
-     * Добавляет продукт
+     * Добавляет или редактирует существующий продукт
      *
      * @return array<string, mixed>
      */
-    public function add(AddProduct $dto): array
+    public function addOrEdit(AddOrEditProduct $dto): array
     {
-        try {
-            $productId = $this->product->add($dto->getName(), $dto->getPrice(), $dto->isHidden());
+        if ($dto->getId() === null) {
+            try {
+                $productId = $this->product->add($dto->getName(), $dto->getPrice(), $dto->isHidden());
 
-            return [
-                'isSuccess' => true,
-                'productId' => $productId,
-            ];
-        } catch (UniqueDbException) {
-            return [
-                'isSuccess' => false,
-                'message' => 'Выбранный продукт уже добавлен в корзину',
-            ];
+                return [
+                    'isSuccess' => true,
+                    'productId' => $productId,
+                ];
+            } catch (UniqueDbException) {
+                return [
+                    'isSuccess' => false,
+                    'message' => 'Выбранный продукт уже добавлен в корзину',
+                ];
+            }
         }
-    }
 
-    /**
-     * Редактирует существующий продукт
-     *
-     * @return array<string, mixed>
-     */
-    public function edit(EditProduct $dto): array
-    {
         $affectedRows = $this->product->edit($dto->getId(), $dto->getName(), $dto->getPrice(), $dto->isHidden());
 
         if ($affectedRows === 0) {
