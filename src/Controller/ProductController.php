@@ -10,11 +10,6 @@ use View\Response;
 
 class ProductController
 {
-    // Если в запросе есть эта опция, то показываем только скрытые продукты
-    private const SHOW_HIDDEN = 'hidden';
-    // Ключ параметра, по которому происходит фильтрация списка товаров
-    private const LIST_SHOW_KEY = 'show';
-
     public function __construct(
         private readonly Product $product,
     ) {
@@ -25,8 +20,8 @@ class ProductController
      */
     public function listAction(Request $request): Response
     {
-        $isShowHidden = $request->query->has(self::LIST_SHOW_KEY)
-            && $request->query->get(self::LIST_SHOW_KEY) === self::SHOW_HIDDEN;
+        $isShowHidden = $request->query->has('show')
+            && $request->query->get('show') === 'hidden';
 
         $response = [];
         foreach ($this->product->getAll($isShowHidden) as $product) {
