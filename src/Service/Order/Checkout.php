@@ -6,7 +6,7 @@ use Controller\Dto\Order\CheckoutProduct;
 use Model;
 use Service\Billing\Creator as BillingCreator;
 use Service\Billing\Exception\BillingException;
-use Service\Communication\Creator as CommunicationCreator;
+use Service\Communication\AnotherCreator as CommunicationCreator;
 use Service\Communication\Exception\CommunicationException;
 use Service\Discount\Creator as DiscountCreator;
 use Service\Discount\Exception\UnavailableDiscountException;
