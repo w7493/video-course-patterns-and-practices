@@ -51,7 +51,7 @@ class Checkout
 
         try {
             $this->communicationCreator
-                ->sendMessage(CommunicationCreator::TYPE_SMS)
+                ->sendMessage('sms')
                 ->prepare($userId, 'checkout_template');
         } catch (CommunicationException) {
             // логируем ошибку
