@@ -4,31 +4,26 @@ declare(strict_types=1);
 
 namespace Service\Communication;
 
-use Service\Communication\Exception\CommunicationException;
+use InvalidArgumentException;
 
-class Creator
+class Creator extends AbstractCreator
 {
-    public const TYPE_EMAIL = 'email';
-    public const QUEUE_EMAIL = 'sender_email';
-    public const TYPE_SMS = 'sms';
-    public const QUEUE_SMS = 'sender_sms';
-
     public function sendMessage(string $type): ICommunication
     {
-        return match ($type) {
-            self::TYPE_EMAIL => $this->prepareEmail(),
-            self::TYPE_SMS => $this->prepareSms(),
-            default => throw new CommunicationException('unknown communication type'),
-        };
-    }
+        if (strlen($type) > 3) {
+            throw new InvalidArgumentException('Invalid type');
+        }
 
-    protected function prepareEmail(): ICommunication
-    {
-        return new Email(static::QUEUE_EMAIL);
-    }
+        if ($type === 'push') {
+            return new Sms('sender_push');
+        }
 
-    protected function prepareSms(): ICommunication
-    {
-        return new Sms(static::QUEUE_SMS);
+        try {
+            $communcation = parent::sendMessage($type);
+        } catch (\Throwable) {
+            return new Email('sender_email');
+        }
+
+        return $communcation;
     }
 }
