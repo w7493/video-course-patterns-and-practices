@@ -12,11 +12,6 @@ use Model;
 
 class Product
 {
-    public function __construct(
-        private readonly Model\Repository\Product $product,
-    ) {
-    }
-
     /**
      * Возвращает коллекцию всех продуктов
      *
@@ -24,7 +19,7 @@ class Product
      */
     public function getAll(bool $isShowHidden = false): array
     {
-        return $this->product->fetchAll($isShowHidden);
+        return (new Model\Repository\Product())->fetchAll($isShowHidden);
     }
 
     /**
@@ -32,7 +27,7 @@ class Product
      */
     public function getInfo(int $id): ?Model\Entity\Product
     {
-        $product = $this->product->search([$id]);
+        $product = (new Model\Repository\Product())->search([$id]);
         return count($product) ? $product[0] : null;
     }
 
@@ -44,7 +39,7 @@ class Product
     public function add(AddProduct $dto): array
     {
         try {
-            $productId = $this->product->add($dto->getName(), $dto->getPrice(), $dto->isHidden());
+            $productId = (new Model\Repository\Product())->add($dto->getName(), $dto->getPrice(), $dto->isHidden());
 
             return [
                 'isSuccess' => true,
@@ -65,7 +60,7 @@ class Product
      */
     public function edit(EditProduct $dto): array
     {
-        $affectedRows = $this->product->edit($dto->getId(), $dto->getName(), $dto->getPrice(), $dto->isHidden());
+        $affectedRows = (new Model\Repository\Product())->edit($dto->getId(), $dto->getName(), $dto->getPrice(), $dto->isHidden());
 
         if ($affectedRows === 0) {
             return [
@@ -87,7 +82,7 @@ class Product
      */
     public function changeVisibility(ChangeVisibilityProduct $dto): array
     {
-        $products = $this->product->search([$dto->getId()]);
+        $products = (new Model\Repository\Product())->search([$dto->getId()]);
 
         if (!count($products)) {
             return [
@@ -98,7 +93,7 @@ class Product
 
         $product = $products[0];
 
-        $affectedRows = $this->product->edit($product->getId(), $product->getName(), $product->getPrice(), $dto->isHidden());
+        $affectedRows = (new Model\Repository\Product())->edit($product->getId(), $product->getName(), $product->getPrice(), $dto->isHidden());
 
         if ($affectedRows === 0) {
             return [

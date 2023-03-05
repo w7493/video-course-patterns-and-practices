@@ -9,11 +9,6 @@ use Model\Entity;
 
 class Product
 {
-    public function __construct(
-        private readonly DbProvider $db,
-    ) {
-    }
-
     /**
      * Возвращает коллекцию всех продуктов
      *
@@ -25,7 +20,7 @@ class Product
         $params = ['is_hidden' => (int) $isShowHidden];
 
         $productList = [];
-        foreach ($this->db->fetchAll($query, $params) as $item) {
+        foreach ((new DbProvider('data/database.sqlite'))->fetchAll($query, $params) as $item) {
             $productList[] = $this->createProductEntity($item);
         }
 
@@ -47,7 +42,7 @@ class Product
         $query = 'select * from product where id in (' . substr(str_repeat('?, ', count($ids)), 0, -2) . ')';
 
         $productList = [];
-        foreach ($this->db->fetchAll($query, $ids) as $item) {
+        foreach ((new DbProvider('data/database.sqlite'))->fetchAll($query, $ids) as $item) {
             $productList[] = $this->createProductEntity($item);
         }
 
@@ -61,7 +56,7 @@ class Product
     {
         $query = 'select count(*) as cnt from product where id = :id';
 
-        return $this->db->fetchAll($query, [':id' => $id])[0]['cnt'] > 0;
+        return (new DbProvider('data/database.sqlite'))->fetchAll($query, [':id' => $id])[0]['cnt'] > 0;
     }
 
     /**
@@ -69,7 +64,7 @@ class Product
      */
     public function add(string $name, int $price, bool $isHidden): int
     {
-        return $this->db->insert(
+        return (new DbProvider('data/database.sqlite'))->insert(
             'insert into product (name, price, is_hidden) values (:name, :price, :is_hidden)',
             ['name' => $name, 'price' => $price, 'is_hidden' => $isHidden],
         );
@@ -80,7 +75,7 @@ class Product
      */
     public function edit(int $id, string $name, int $price, bool $isHidden): int
     {
-        return $this->db->execute(
+        return (new DbProvider('data/database.sqlite'))->execute(
             'update product set name = :name, price = :price, is_hidden = :is_hidden where id = :id',
             ['id' => $id, 'name' => $name, 'price' => $price, 'is_hidden' => (int) $isHidden],
         );

@@ -15,11 +15,6 @@ class ProductController
     // Ключ параметра, по которому происходит фильтрация списка товаров
     private const LIST_SHOW_KEY = 'show';
 
-    public function __construct(
-        private readonly Product $product,
-    ) {
-    }
-
     /**
      * Список всех продуктов
      */
@@ -29,7 +24,7 @@ class ProductController
             && $request->query->get(self::LIST_SHOW_KEY) === self::SHOW_HIDDEN;
 
         $response = [];
-        foreach ($this->product->getAll($isShowHidden) as $product) {
+        foreach ((new Product())->getAll($isShowHidden) as $product) {
             $response[] = $product->toArray();
         }
 
@@ -41,7 +36,7 @@ class ProductController
      */
     public function infoAction(int $id): Response
     {
-        $product = $this->product->getInfo($id);
+        $product = (new Product())->getInfo($id);
 
         if ($product === null) {
             return new Response();
