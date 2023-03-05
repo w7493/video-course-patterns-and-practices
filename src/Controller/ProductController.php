@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Controller;
 
+use App;
+use Model;
 use Service\Product\Product;
 use Symfony\Component\HttpFoundation\Request;
 use View\Response;
@@ -15,9 +17,13 @@ class ProductController
     // Ключ параметра, по которому происходит фильтрация списка товаров
     private const LIST_SHOW_KEY = 'show';
 
-    public function __construct(
-        private readonly Product $product,
-    ) {
+    private Product $product;
+
+    public function __construct()
+    {
+        $db = new App\Db\DbProvider('data/database.sqlite');
+        $productRepository = new Model\Repository\Product($db);
+        $this->product = new Product($productRepository);
     }
 
     /**
