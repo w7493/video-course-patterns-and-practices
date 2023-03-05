@@ -15,20 +15,14 @@ class Creator
 
     public function sendMessage(string $type): ICommunication
     {
-        return match ($type) {
-            self::TYPE_EMAIL => $this->prepareEmail(),
-            self::TYPE_SMS => $this->prepareSms(),
-            default => throw new CommunicationException('unknown communication type'),
-        };
-    }
+        if ($type === self::TYPE_EMAIL) {
+            return new Email(self::QUEUE_EMAIL);
+        }
 
-    protected function prepareEmail(): ICommunication
-    {
-        return new Email(static::QUEUE_EMAIL);
-    }
+        if ($type === self::TYPE_SMS) {
+            return new Sms(self::QUEUE_SMS);
+        }
 
-    protected function prepareSms(): ICommunication
-    {
-        return new Sms(static::QUEUE_SMS);
+        throw new CommunicationException('unknown communication type');
     }
 }
