@@ -7,16 +7,14 @@ namespace Controller;
 use Controller\Dto\Order\AddProduct;
 use Controller\Dto\Order\CheckoutProduct;
 use Controller\Dto\Order\RemoveProduct;
-use Service\Order\Basket;
-use Service\Order\Checkout;
+use Service\Order\Order;
 use Symfony\Component\HttpFoundation\Request;
 use View\Response;
 
 class OrderController
 {
     public function __construct(
-        private readonly Basket $basket,
-        private readonly Checkout $checkout,
+        private readonly Order $order,
     ) {
     }
 
@@ -26,7 +24,7 @@ class OrderController
     public function infoAction(int $userId): Response
     {
         $response = [];
-        foreach ($this->basket->getUserBasket($userId) as $item) {
+        foreach ($this->order->getUserBasket($userId) as $item) {
             $response[] = $item->toArray();
         }
 
@@ -39,7 +37,7 @@ class OrderController
     public function checkProductInBasketAction(int $userId, int $productId): Response
     {
         return new Response([
-            'isInBasket' => $this->basket->isProductInBasket($userId, $productId),
+            'isInBasket' => $this->order->isProductInBasket($userId, $productId),
         ]);
     }
 
@@ -59,7 +57,7 @@ class OrderController
             );
         }
 
-        $operation = $this->basket->addProduct(
+        $operation = $this->order->addProduct(
             $this->transformToAddProductDto($requestData)
         );
 
@@ -95,7 +93,7 @@ class OrderController
             );
         }
 
-        $affectedRows = $this->basket->removeProduct(
+        $affectedRows = $this->order->removeProduct(
             $this->transformToRemoveProductDto($requestData)
         );
 
@@ -120,7 +118,7 @@ class OrderController
 
         return new Response(
             [
-                'finished' => $this->checkout->checkoutProcess(
+                'finished' => $this->order->checkoutProcess(
                     $userId,
                     $this->transformToCheckoutProductDto($requestData),
                 ),
